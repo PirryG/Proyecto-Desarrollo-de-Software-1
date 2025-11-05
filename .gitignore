@@ -1,0 +1,37 @@
+# ===========================
+# 🌐 FRONTEND (React Native)
+# ===========================
+node_modules/
+.expo/
+.expo-shared/
+dist/
+build/
+android/
+ios/
+*.apk
+*.aab
+
+# Archivos de entorno
+.env
+.env.local
+.env.production
+
+# Logs y temporales
+npm-debug.log
+yarn-error.log
+*.log
+
+# ===========================
+# ☕ BACKEND (Spring Boot)
+# ===========================
+target/
+*.iml
+*.class
+*.jar
+*.war
+.idea/
+.vscode/
+.DS_Store
+
+# Archivos de sistema
+Thumbs.db
