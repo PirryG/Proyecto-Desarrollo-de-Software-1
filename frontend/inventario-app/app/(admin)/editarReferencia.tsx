@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, Button, Alert, StyleSheet, Switch } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  Alert,
+  StyleSheet,
+  Switch,
+} from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -12,7 +20,7 @@ export default function EditarReferencia() {
   const router = useRouter();
   const params = useLocalSearchParams();
 
-  // Normalizar ID (puede venir como string o string[])
+  // Normalizar ID
   const idStr = Array.isArray(params.id) ? params.id[0] : params.id;
   const id = Number(idStr);
 
@@ -23,7 +31,6 @@ export default function EditarReferencia() {
 
   useEffect(() => {
     const init = async () => {
-      // Validar sesión
       const data = await AsyncStorage.getItem("usuario");
 
       if (!data) {
@@ -42,14 +49,12 @@ export default function EditarReferencia() {
 
       setUsuario(user);
 
-      // Validar ID
       if (!id || isNaN(id)) {
         Alert.alert("Error", "ID de referencia inválido.");
         router.back();
         return;
       }
 
-      // Cargar datos de referencia
       try {
         const referencia = await obtenerReferenciaPorId(id);
         setCodigo(referencia.codigo);
@@ -64,23 +69,49 @@ export default function EditarReferencia() {
     init();
   }, []);
 
-  // Guardar cambios
+  // ---------------------------
+  // GUARDAR CAMBIOS
+  // ---------------------------
   const handleActualizar = async () => {
-    if (!codigo || !nombre) {
+    const codigoNormalizado = String(codigo || "").trim().toUpperCase();
+    const nombreNormalizado = String(nombre || "").trim();
+
+    const regexCodigo = /^RF\d+$/;
+
+    if (!codigoNormalizado || !nombreNormalizado) {
       Alert.alert("Error", "Todos los campos son obligatorios.");
       return;
     }
 
+    if (!regexCodigo.test(codigoNormalizado)) {
+      Alert.alert(
+        "Código inválido",
+        "El código debe empezar con 'RF' seguido de números. Ejemplos válidos: RF1, RF05, RF120"
+      );
+      return;
+    }
+
     try {
-      const payload = { codigo, nombre, activo };
+      const payload = {
+        codigo: codigoNormalizado,
+        nombre: nombreNormalizado,
+        activo,
+      };
+
+      console.log("Enviando actualización:", payload);
 
       await actualizarReferencia(id, payload);
 
       Alert.alert("Éxito", "Referencia actualizada correctamente.");
       router.push("/home");
+
     } catch (error: any) {
       console.error("Error al actualizar referencia:", error);
-      Alert.alert("Error", "No se pudo actualizar la referencia.");
+
+      Alert.alert(
+        "Error",
+        error.response?.data || "No se pudo actualizar la referencia."
+      );
     }
   };
 
@@ -99,6 +130,7 @@ export default function EditarReferencia() {
       <TextInput
         placeholder="Código"
         value={codigo}
+        autoCapitalize="characters"
         onChangeText={setCodigo}
         style={styles.input}
       />

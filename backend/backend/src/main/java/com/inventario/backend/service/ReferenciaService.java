@@ -16,13 +16,25 @@ public class ReferenciaService {
     private ReferenciaRepository referenciaRepository;
 
     // ----------------------------------------------------
+    // VALIDAR FORMATO DE CÓDIGO (RF + números)
+    // ----------------------------------------------------
+    private void validarCodigoRF(String codigo) {
+        if (codigo == null || !codigo.matches("^RF\\d+$")) {
+            throw new IllegalArgumentException(
+                "El código debe iniciar con 'RF' seguido únicamente de números. Ejemplos válidos: RF1, RF05, RF100."
+            );
+        }
+    }
+
+    // ----------------------------------------------------
     // REGISTRAR REFERENCIA
     // ----------------------------------------------------
     public Referencia registrar(Referencia referencia) {
 
-        referencia.setCodigo(referencia.getCodigo().trim());
+        referencia.setCodigo(referencia.getCodigo().trim().toUpperCase());
         referencia.setNombre(referencia.getNombre().trim());
 
+        validarCodigoRF(referencia.getCodigo());
         ValidadorDatos.validarReferencia(referencia);
 
         if (referenciaRepository.findByCodigo(referencia.getCodigo()).isPresent()) {
@@ -73,9 +85,10 @@ public class ReferenciaService {
         Referencia referencia = referenciaRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Referencia no encontrada."));
 
-        nuevosDatos.setCodigo(nuevosDatos.getCodigo().trim());
+        nuevosDatos.setCodigo(nuevosDatos.getCodigo().trim().toUpperCase());
         nuevosDatos.setNombre(nuevosDatos.getNombre().trim());
 
+        validarCodigoRF(nuevosDatos.getCodigo());
         ValidadorDatos.validarReferencia(nuevosDatos);
 
         referenciaRepository.findByCodigo(nuevosDatos.getCodigo())
@@ -124,7 +137,7 @@ public class ReferenciaService {
     }
 
     // ----------------------------------------------------
-    // OBTENER POR ESTADO (TRUE = activas, FALSE = inactivas)
+    // OBTENER POR ESTADO
     // ----------------------------------------------------
     public List<Referencia> obtenerPorEstado(boolean activo) {
         return referenciaRepository.findByActivo(activo);

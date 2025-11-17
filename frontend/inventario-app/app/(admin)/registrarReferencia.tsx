@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, Button, Alert, StyleSheet } from "react-native";
+import { View, Text, TextInput, Button, Alert, StyleSheet, ActivityIndicator } from "react-native";
 import { useRouter, useFocusEffect } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { registrarReferencia } from "../../services/referenciaService";
@@ -10,8 +10,9 @@ export default function RegistrarReferencia() {
 
   const [codigo, setCodigo] = useState("");
   const [nombre, setNombre] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  // 🔐 Verificar sesión y rol
+  // Verificar sesión y rol
   const verificarAcceso = async () => {
     try {
       const data = await AsyncStorage.getItem("usuario");
@@ -47,33 +48,49 @@ export default function RegistrarReferencia() {
   );
 
   const handleRegistrar = async () => {
-    if (!codigo || !nombre) {
+    // Normalizar (el problema más común: espacios o minúsculas)
+    const codigoNormalizado = String(codigo || "").trim().toUpperCase();
+    const nombreNormalizado = String(nombre || "").trim();
+
+    console.log("Intento crear referencia. código(raw):", codigo, "=> normalizado:", codigoNormalizado, "nombre:", nombreNormalizado);
+
+    const regexCodigo = /^RF\d+$/;
+
+    if (!codigoNormalizado || !nombreNormalizado) {
       Alert.alert("Error", "Por favor llena todos los campos.");
       return;
     }
 
+    if (!regexCodigo.test(codigoNormalizado)) {
+      Alert.alert(
+        "Código inválido",
+        "El código debe empezar con 'RF' seguido de números. Ejemplos válidos: RF1, RF02, RF100"
+      );
+      return;
+    }
+
     try {
+      setLoading(true);
+
       const nuevaReferencia = {
-        codigo,
-        nombre,
-        activo: true,   // 👈 SIEMPRE TRUE AL CREAR
+        codigo: codigoNormalizado,
+        nombre: nombreNormalizado,
+        activo: true,
       };
+
+      console.log("Enviando payload a backend:", nuevaReferencia);
 
       const response = await registrarReferencia(nuevaReferencia);
 
-      Alert.alert(
-        "Éxito",
-        `Referencia ${response.codigo} creada correctamente`
-      );
+      console.log("Respuesta del backend:", response);
 
+      Alert.alert("Éxito", `Referencia ${response.codigo} creada correctamente`);
       router.push("/home");
     } catch (error: any) {
       console.error("Error al crear referencia:", error.response?.data || error.message);
-
-      Alert.alert(
-        "Error",
-        error.response?.data || "No se pudo crear la referencia."
-      );
+      Alert.alert("Error", error.response?.data || "No se pudo crear la referencia.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -90,8 +107,9 @@ export default function RegistrarReferencia() {
       <Text style={styles.title}>Registrar Referencia</Text>
 
       <TextInput
-        placeholder="Código (ej: R001)"
+        placeholder="Código (Ej: RF01)"
         value={codigo}
+        autoCapitalize="characters"
         onChangeText={setCodigo}
         style={styles.input}
       />
@@ -103,7 +121,11 @@ export default function RegistrarReferencia() {
         style={styles.input}
       />
 
-      <Button title="Registrar" onPress={handleRegistrar} />
+      {loading ? (
+        <ActivityIndicator size="small" />
+      ) : (
+        <Button title="Registrar" onPress={handleRegistrar} />
+      )}
     </View>
   );
 }
