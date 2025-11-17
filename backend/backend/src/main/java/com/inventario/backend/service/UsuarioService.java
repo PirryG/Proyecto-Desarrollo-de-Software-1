@@ -19,7 +19,7 @@ public class UsuarioService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    // 🔹 Registrar usuario
+    //  Registrar usuario
     public Usuario registrarUsuario(Usuario usuario) {
         if (usuario.getContrasena() == null || usuario.getContrasena().isEmpty()) {
             throw new IllegalArgumentException("La contraseña no puede ser nula o vacía");
@@ -28,7 +28,7 @@ public class UsuarioService {
         return usuarioRepository.save(usuario);
     }
 
-    // 🔹 Iniciar sesión
+    //  Iniciar sesión
     public Optional<Usuario> login(String cedula, String contrasena) {
         Optional<Usuario> usuarioOpt = usuarioRepository.findByCedula(cedula);
 
@@ -38,14 +38,14 @@ public class UsuarioService {
 
         Usuario usuario = usuarioOpt.get();
 
-        //  Verificar si está inactivo
+        // se verifica si está inactivo
      if (!usuario.isActivo()) {
     throw new IllegalArgumentException("El usuario está desactivado. Contacta al administrador.");
 }
 
 
 
-        //  Validar contraseña
+        // Se valida contraseña
         ValidadorDatos.validarCredenciales(usuario, contrasena);
 
         return Optional.of(usuario);

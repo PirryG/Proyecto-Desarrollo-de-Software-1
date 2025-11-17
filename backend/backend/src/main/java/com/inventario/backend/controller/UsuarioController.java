@@ -26,7 +26,7 @@ public class UsuarioController {
     @Autowired
     private UsuarioService usuarioService;
 
-    // ✅ Registrar un nuevo usuario
+    //  Registrar un nuevo usuario
     @PostMapping("/registrar")
     public ResponseEntity<?> registrarUsuario(@RequestBody Usuario usuario) {
         try {
@@ -41,7 +41,7 @@ public class UsuarioController {
                 return ResponseEntity.status(400).body("El correo ya está registrado.");
             }
 
-            // 🔐 Encriptar contraseña antes de guardar
+            //  Encriptar contraseña antes de guardar
             BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
             usuario.setContrasena(passwordEncoder.encode(usuario.getContrasena()));
 
@@ -58,19 +58,19 @@ public class UsuarioController {
         }
     }
 
-    // ✅ Actualizar datos del usuario
+    //  Actualizar datos del usuario
     @PutMapping("/{idUsuario}")
     public Usuario actualizar(@PathVariable Long idUsuario, @RequestBody Usuario usuario) {
         return usuarioService.actualizarPerfil(idUsuario, usuario);
     }
 
-    // ✅ Listar todos los usuarios
+    //  Listar todos los usuarios
     @GetMapping
     public List<Usuario> listarUsuarios() {
         return usuarioService.obtenerTodos();
     }
 
-    // ✅ Obtener un usuario por su ID
+    //  Obtener un usuario por su ID
     @GetMapping("/{idUsuario}")
     public ResponseEntity<Usuario> obtenerUsuarioPorId(@PathVariable Long idUsuario) {
         Optional<Usuario> usuario = usuarioService.obtenerPorId(idUsuario);
@@ -78,7 +78,7 @@ public class UsuarioController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // ✅ Cambiar el estado del usuario
+    //  Cambiar el estado del usuario
     @PutMapping("/{id}/estado")
     public ResponseEntity<?> cambiarEstadoUsuario(
             @PathVariable Long id,
@@ -99,7 +99,7 @@ public class UsuarioController {
         return ResponseEntity.ok(usuario);
     }
 
-    // ✅ Login de usuario (por cédula y contraseña)
+    // Login de usuario (por cédula y contraseña)
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> credenciales) {
         try {

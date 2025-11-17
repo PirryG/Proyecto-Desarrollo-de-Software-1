@@ -1,30 +1,35 @@
 package com.inventario.backend.utils;
 
 import com.inventario.backend.model.Usuario;
+import com.inventario.backend.model.Referencia;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 public class ValidadorDatos {
 
     private static final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    //  Validar credenciales en login
+    // ----------------------------------------------------
+    // VALIDACIONES DE LOGIN
+    // ----------------------------------------------------
     public static void validarCredenciales(Usuario usuario, String contrasenaIngresada) {
         if (usuario == null) {
             throw new IllegalArgumentException("El usuario no existe.");
         }
 
-        if (contrasenaIngresada == null || contrasenaIngresada.isEmpty()) {
+        if (contrasenaIngresada == null || contrasenaIngresada.trim().isEmpty()) {
             throw new IllegalArgumentException("La contraseña no puede estar vacía.");
         }
 
-        //  Validar coincidencia de contraseña (encriptada)
         if (!passwordEncoder.matches(contrasenaIngresada, usuario.getContrasena())) {
             throw new IllegalArgumentException("Contraseña incorrecta.");
         }
     }
 
-    //  Validar datos del usuario al registrar o actualizar
+    // ----------------------------------------------------
+    // VALIDACIONES DE USUARIO
+    // ----------------------------------------------------
     public static void validarUsuario(Usuario usuario) {
+
         if (usuario == null) {
             throw new IllegalArgumentException("El usuario no puede ser nulo.");
         }
@@ -37,7 +42,7 @@ public class ValidadorDatos {
             throw new IllegalArgumentException("La cédula debe contener entre 6 y 10 dígitos numéricos.");
         }
 
-        if (usuario.getCorreo() == null || 
+        if (usuario.getCorreo() == null ||
             !usuario.getCorreo().matches("^[\\w-.]+@[\\w-]+\\.[a-zA-Z]{2,}$")) {
             throw new IllegalArgumentException("El correo electrónico no es válido.");
         }
@@ -54,5 +59,25 @@ public class ValidadorDatos {
         if (!rol.equals("ADMIN") && !rol.equals("TECNICO")) {
             throw new IllegalArgumentException("El rol debe ser ADMIN o TECNICO.");
         }
+    }
+
+    // ----------------------------------------------------
+    // VALIDACIONES DE REFERENCIA
+    // ----------------------------------------------------
+    public static void validarReferencia(Referencia referencia) {
+
+        if (referencia == null) {
+            throw new IllegalArgumentException("La referencia no puede ser nula.");
+        }
+
+        if (referencia.getCodigo() == null || referencia.getCodigo().trim().isEmpty()) {
+            throw new IllegalArgumentException("El código de la referencia no puede estar vacío.");
+        }
+
+        if (referencia.getNombre() == null || referencia.getNombre().trim().isEmpty()) {
+            throw new IllegalArgumentException("El nombre de la referencia no puede estar vacío.");
+        }
+
+        // activo no se valida porque tu modelo ya lo define como boolean por defecto
     }
 }

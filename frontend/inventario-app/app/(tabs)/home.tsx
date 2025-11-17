@@ -88,15 +88,7 @@ export default function Home() {
               <Icon name="person-add-outline" size={22} color="#153cc7" />
               <Text style={styles.drawerText}>Registrar Usuario</Text>
             </TouchableOpacity>
-          </>
-        ) : (
-          <View style={{ padding: 20 }}>
-            <Text style={{ color: '#555' }}>No tienes permisos de administración.</Text>
-          </View>
-        )}
-
-        {/*  Nuevo botón para Editar Perfil */}
-        <TouchableOpacity
+            <TouchableOpacity
           style={styles.drawerItem}
           onPress={() => {
             drawerRef.closeDrawer();
@@ -106,6 +98,37 @@ export default function Home() {
           <Icon name="create-outline" size={22} color="#153cc7" />
           <Text style={styles.drawerText}>Editar Perfil</Text>
         </TouchableOpacity>
+            {/* ---------------- REFERENCIAS ---------------- */}
+
+<TouchableOpacity
+  style={styles.drawerItem}
+  onPress={() => {
+    drawerRef.closeDrawer();
+    router.push('/(admin)/ListaReferencias');
+  }}
+>
+  <Icon name="albums-outline" size={22} color="#153cc7" />
+  <Text style={styles.drawerText}>Lista de Referencias</Text>
+</TouchableOpacity>
+
+<TouchableOpacity
+  style={styles.drawerItem}
+  onPress={() => {
+    drawerRef.closeDrawer();
+    router.push('/(admin)/registrarReferencia');
+  }}
+>
+  <Icon name="add-circle-outline" size={22} color="#153cc7" />
+  <Text style={styles.drawerText}>Registrar Referencia</Text>
+</TouchableOpacity>
+          </>
+        ) : (
+          <View style={{ padding: 20 }}>
+            <Text style={{ color: '#555' }}>No tienes permisos de administración.</Text>
+          </View>
+        )}
+
+        
 
         <TouchableOpacity
           style={[styles.drawerItem, { marginTop: 20 }]}
