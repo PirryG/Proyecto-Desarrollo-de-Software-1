@@ -17,7 +17,7 @@ export default function EditarUsuarioAdmin() {
   const [contrasena, setContrasena] = useState('');
   const [rol, setRol] = useState('');
 
-  // 🔹 Verificar que el usuario sea ADMIN
+  // Verificar que el usuario sea ADMIN
   useEffect(() => {
     const verificarAcceso = async () => {
       const data = await AsyncStorage.getItem('usuario');
@@ -37,26 +37,18 @@ export default function EditarUsuarioAdmin() {
     verificarAcceso();
   }, []);
 
-  // 🔹 Cargar datos del usuario a editar
+  // Cargar datos del usuario a editar
   useEffect(() => {
     const cargarUsuario = async () => {
       try {
-        if (!idUsuario) {
-          console.log(' No se recibió idUsuario');
-          return;
-        }
+        if (!idUsuario) return;
 
         const idValido =
           Array.isArray(idUsuario) ? parseInt(idUsuario[0]) : parseInt(idUsuario as string);
 
-        if (isNaN(idValido)) {
-          console.log(' idUsuario no es un número válido:', idUsuario);
-          return;
-        }
+        if (isNaN(idValido)) return;
 
-        console.log(' Obteniendo usuario con ID:', idValido);
         const data = await obtenerUsuarioPorId(idValido);
-        console.log(' Usuario cargado:', data);
 
         setUsuarioEditado(data);
         setNombre(data.nombre);
@@ -64,7 +56,6 @@ export default function EditarUsuarioAdmin() {
         setCorreo(data.correo);
         setRol(data.rol);
       } catch (error) {
-        console.error(' Error al cargar usuario:', error);
         Alert.alert('Error', 'No se pudo cargar la información del usuario.');
         router.back();
       } finally {
@@ -74,10 +65,10 @@ export default function EditarUsuarioAdmin() {
     cargarUsuario();
   }, [idUsuario]);
 
-  // 🔹 Actualizar usuario
+  // Actualizar usuario
   const handleActualizar = async () => {
-    if (!nombre || !cedula || !correo || !rol) {
-      Alert.alert('Error', 'Por favor llena todos los campos requeridos.');
+    if (!nombre || !correo || !rol) {
+      Alert.alert('Error', 'Por favor llena todos los campos requeridos (excepto la contraseña).');
       return;
     }
 
@@ -92,7 +83,6 @@ export default function EditarUsuarioAdmin() {
 
       const datosActualizados: Record<string, any> = {
         nombre,
-        cedula,
         correo,
         rol: rol.toUpperCase(),
       };
@@ -101,21 +91,17 @@ export default function EditarUsuarioAdmin() {
         datosActualizados.contrasena = contrasena;
       }
 
-      console.log(' Enviando datos actualizados:', datosActualizados);
       await actualizarUsuario(idValido, datosActualizados);
       Alert.alert('Éxito', 'Usuario actualizado correctamente.');
       router.push('/ListaUsuarios');
     } catch (error: any) {
-  console.error(' Error al actualizar usuario:', error);
+      const mensajeError =
+        error.response?.data ||
+        error.response?.data?.message ||
+        'No se pudo actualizar el usuario.';
 
-  //  Intentar obtener mensaje detallado del backend
-  const mensajeError =
-    error.response?.data || // cuando el backend manda texto plano
-    error.response?.data?.message || // si manda JSON { message: ... }
-    'No se pudo actualizar el usuario.';
-
-  Alert.alert('Error', mensajeError);
-}
+      Alert.alert('Error', mensajeError);
+    }
   };
 
   if (loading) {
@@ -138,19 +124,29 @@ export default function EditarUsuarioAdmin() {
     <View style={styles.container}>
       <Text style={styles.title}>Editar Usuario</Text>
 
-      <TextInput placeholder="Nombre" value={nombre} onChangeText={setNombre} style={styles.input} />
       <TextInput
-  placeholder="Cédula"
-  value={cedula}
-  onChangeText={setCedula}
-  editable={usuarioAdmin?.rol === 'ADMIN'} //  solo editable si es admin
-  style={[
-    styles.input,
-    usuarioAdmin?.rol !== 'ADMIN' && styles.disabledInput, // gris si no es admin
-  ]}
-/>
+        placeholder="Nombre"
+        value={nombre}
+        onChangeText={setNombre}
+        style={styles.input}
+      />
 
-      <TextInput placeholder="Correo" value={correo} onChangeText={setCorreo} style={styles.input} />
+      {/* 🚫 CÉDULA NO EDITABLE */}
+      <TextInput
+        placeholder="Cédula"
+        value={cedula}
+        editable={false}               // NO editable
+        selectTextOnFocus={false}      // No deja seleccionar
+        style={[styles.input, styles.disabledInput]} // Gris
+      />
+
+      <TextInput
+        placeholder="Correo"
+        value={correo}
+        onChangeText={setCorreo}
+        style={styles.input}
+      />
+
       <TextInput
         placeholder="Nueva contraseña (opcional)"
         secureTextEntry
@@ -158,6 +154,7 @@ export default function EditarUsuarioAdmin() {
         onChangeText={setContrasena}
         style={styles.input}
       />
+
       <TextInput
         placeholder="Rol (ADMIN o TECNICO)"
         value={rol}

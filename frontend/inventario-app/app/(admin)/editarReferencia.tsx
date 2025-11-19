@@ -69,36 +69,20 @@ export default function EditarReferencia() {
     init();
   }, []);
 
-  // ---------------------------
-  // GUARDAR CAMBIOS
-  // ---------------------------
   const handleActualizar = async () => {
-    const codigoNormalizado = String(codigo || "").trim().toUpperCase();
     const nombreNormalizado = String(nombre || "").trim();
 
-    const regexCodigo = /^RF\d+$/;
-
-    if (!codigoNormalizado || !nombreNormalizado) {
-      Alert.alert("Error", "Todos los campos son obligatorios.");
-      return;
-    }
-
-    if (!regexCodigo.test(codigoNormalizado)) {
-      Alert.alert(
-        "Código inválido",
-        "El código debe empezar con 'RF' seguido de números. Ejemplos válidos: RF1, RF05, RF120"
-      );
+    if (!nombreNormalizado) {
+      Alert.alert("Error", "El nombre de la referencia es obligatorio.");
       return;
     }
 
     try {
       const payload = {
-        codigo: codigoNormalizado,
+        codigo, // ← el código no se modifica
         nombre: nombreNormalizado,
         activo,
       };
-
-      console.log("Enviando actualización:", payload);
 
       await actualizarReferencia(id, payload);
 
@@ -132,7 +116,9 @@ export default function EditarReferencia() {
         value={codigo}
         autoCapitalize="characters"
         onChangeText={setCodigo}
-        style={styles.input}
+        style={[styles.input, { backgroundColor: "#e6e6e6", color: "#555" }]}
+        editable={false}
+        selectTextOnFocus={false}
       />
 
       <TextInput
